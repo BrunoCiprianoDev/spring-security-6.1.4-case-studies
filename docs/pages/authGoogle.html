@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="../styles/index.css">
+    <link rel="stylesheet" href="../styles/header.css">
+    <link rel="stylesheet" href="../styles/sidebar.css">
+    <meta name="author" content="Bruno Cipriano Ribeiro">
+
+    <style>
+        #list-box p {
+            margin-bottom: 1em;
+        }
+
+        #sub-list {
+            border: 1px solid black;
+            padding: 1em;
+            padding-left: 2em;
+            margin-bottom: 1em;
+        }
+
+        .img-area-tp1 {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .img-area-tp1 img {
+            display: flex;
+            width: 40%;
+        }
+
+        table {
+            margin-top: 2em;
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 1.5em;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {}
+
+        /* Defina a largura da coluna "Requisito Funcional" */
+        th.requisito-funcional {
+            width: 3em;
+        }
+
+        caption {
+            text-align: left;
+            font-weight: bold;
+            border: 1px solid #ddd;
+            background-color: #f2f2f2;
+            padding: 5px;
+            border: 1px solid #ddd;
+        }
+
+        caption span {
+            font-size: smaller;
+            float: right
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <img src="../assets/icon.png">
+        <div id="header-nav">
+            <ul>
+            </ul>
+        </div>
+    </header>
+    <div id="sidebar">
+        <ul>
+            <li><a href="../index.html"><img src="../assets/home.png"><span>Início</span></span></a></li>
+            <li><a href="authLocal.html"><img src="../assets/one.png"><span>Autenticação Local</span></span></a></li>
+            <li><a href="authGoogle.html"><img src="../assets/two.png"><span>Google Authentication</span></span></a>
+            </li>
+        </ul>
+    </div>
+    <div id="content">
+        <h1>Resolução utilizando solver</h1>
+        <p><span class="first-letter"></span>Atualmente, tanto o Microsoft Excel quanto o LibreOffice já possuem a
+            extensão "SOLVER" para resolver esse
+            tipo de problema de programação linear. Porém, o objetivo desse projeto é compreender como esses algoritmos
+            funcionam por baixo dos panos. Veja o exemplo abaixo:</p>
+        <p><span class="first-letter"></span>O gerente de projeto de uma empresa de Desenvolvimento de Software está
+            definindo os requisitos necessários para a elaboração de um grande projeto.</p>
+        <p><span class="first-letter"></span>A coworking possui postos distintos para locação: o espaço E1, de custo de
+            $500,00 por locação e o espaço E2, custando $200,00 por unidade locada. O gerente pretende alugar tais
+            espaços, inteiros ou fracionados, de forma a minimizar os gastos com a alocação da equipe.</p>
+        <p><span class="first-letter"></span>Os espaços oferecidos apresentam características divergentes para os
+            espaços de trabalho:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>E1</th>
+                    <th>E2</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Capacidade</td>
+                    <td>400</td>
+                    <td>350</td>
+                </tr>
+                <tr>
+                    <td>Divisões internas</td>
+                    <td>25</td>
+                    <td>50</td>
+                </tr>
+                <tr>
+                    <td>Espaço(m2)</td>
+                    <td>750</td>
+                    <td>375</td>
+                </tr>
+            </tbody>
+        </table>
+        <div id="list-box">
+            <ul>
+                <li>
+                    <p>A gestão acredita que o espaço físico nunca é demais, sendo assim estabeleceu que necessitará de
+                        no
+                        mínimo 630 m2 para a locação.</p>
+                </li>
+                <li>
+                    <p>Afirma ainda que serão contratados exatamente 1050 funcionários para trabalhar no projeto</p>
+                </li>
+                <li>
+                    <p>Por fim, para incentivar a integração da equipe a gestão deseja que o máximo de divisões de áreas
+                        internas deve ser de 80 unidades.</p>
+                </li>
+            </ul>
+        </div>
+        <div class="img-area-tp1">
+            <img src="../imagens/resolucaoSolver/planilhaFinal.png" />
+        </div>
+        <div id="download-area">
+            <h4>Clique no botão a baixo para baixar a planilha</h4>
+            <a href="../dowload/planilhaSolver.ods">
+                <span>Baixar planilha</span>
+            </a>
+        </div>
+        <hr>
+        <div id="autor-area">
+            <p>Autor: Bruno Cipriano Ribeiro</p>
+        </div>
+    </div>
+
+</body>
+
+</html>

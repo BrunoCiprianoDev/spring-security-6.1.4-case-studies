@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="../styles/index.css">
+    <link rel="stylesheet" href="../styles/header.css">
+    <link rel="stylesheet" href="../styles/sidebar.css">
+    <meta name="author" content="Bruno Cipriano Ribeiro">
+
+    <style>
+        #list-box p {
+            margin-bottom: 1em;
+        }
+
+        #sub-list {
+            border: 1px solid black;
+            padding: 1em;
+            padding-left: 2em;
+            margin-bottom: 1em;
+        }
+
+        .img-area-tp1 {
+            margin-top: 2em;
+            margin-bottom: 2em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .img-area-tp1 img {
+            display: flex;
+            width: 70%;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <img src="../assets/icon.png">
+        <div id="header-nav">
+            <ul>
+            </ul>
+        </div>
+    </header>
+    <div id="sidebar">
+        <ul>
+            <li><a href="../index.html"><img src="../assets/home.png"><span>Início</span></span></a></li>
+            <li><a href="authLocal.html"><img src="../assets/one.png"><span>Autenticação Local</span></span></a></li>
+            <li><a href="authGoogle.html"><img src="../assets/two.png"><span>Google Authentication</span></span></a>
+        </ul>
+    </div>
+    <div id="content">
+        <h1>Autenticação Local</h1>
+        <h2>Configurações necessárias para implementar o Spring Security</h2>
+        <h3>1. Criar para as migrations para as tabelas das entidades Spring Security (Flyway)</h3>
+        <div class="img-area-tp1">
+            <img src="../imagens/authLocal/user-migration.png" />
+        </div>
+        <p><span class="first-letter"></span>Para o estudo de caso desse projeto, utilizamos um conjunto definido de
+            regras possíveis por meio de enumerações. Portanto, um usuário pode assumir 3 papéis: ADMIN, EMPLOYEE ou
+            CLIENT</p>
+        <p><span class="first-letter"></span>account_non_expired (Conta não expirada): Este atributo indica se a conta
+            do usuário está ou não expirada em termos de validade temporal. Por exemplo, uma conta pode ter uma data de
+            validade definida e, se essa data expirar, a conta será considerada expirada. Se o valor desse atributo for
+            true, a conta não está expirada; se for false, a conta está expirada e não poderá ser usada para
+            autenticação.
+        </p>
+        <p><span class="first-letter"></span>account_non_locked (Conta não bloqueada): Este atributo controla se a conta
+            do usuário está bloqueada ou
+            não. Em alguns sistemas, as contas podem ser bloqueadas temporariamente após um número excessivo de
+            tentativas de login malsucedidas. Se o valor desse atributo for true, a conta não está bloqueada; se for
+            false, a conta está bloqueada e não poderá ser usada para autenticação.</p>
+        <p><span class="first-letter"></span> credentials_non_expired (Credenciais não expiradas): Este atributo
+            verifica se as credenciais (geralmente a
+            senha) associadas à conta do usuário estão ou não expiradas. Em muitos sistemas, as senhas têm uma data de
+            validade, e se essa data expirar, as credenciais são consideradas expiradas. Se o valor desse atributo for
+            true, as credenciais não estão expiradas; se for false, as credenciais estão expiradas e o usuário deverá
+            atualizá-las antes de poder fazer login novamente.</p>
+        <p><span class="first-letter"></span> enabled (Habilitado): Este atributo controla se a conta do usuário está
+            habilitada ou desabilitada. Uma
+            conta desabilitada não pode ser usada para autenticação, independentemente de outras condições. Se o valor
+            desse atributo for true, a conta está habilitada; se for false, a conta está desabilitada.</p>
+        <h3>2. Mapeamento da entidade User</h3>
+        <pre><code>package com.bcipriano.learning.studiecase.domain;
+
+                    import jakarta.persistence.*;
+                    import lombok.AllArgsConstructor;
+                    import lombok.Builder;
+                    import lombok.Data;
+                    import lombok.NoArgsConstructor;
+                    import org.springframework.security.core.GrantedAuthority;
+                    import org.springframework.security.core.authority.SimpleGrantedAuthority;
+                    import org.springframework.security.core.userdetails.UserDetails;
+                    
+                    import java.io.Serializable;
+                    import java.util.Collection;
+                    import java.util.List;
+                    
+                    @Entity(name = "users")
+                    @Table(name = "users")
+                    @Builder
+                    @Data
+                    @NoArgsConstructor
+                    @AllArgsConstructor
+                    public class User implements UserDetails, Serializable {
+                    
+                        @Id
+                        @GeneratedValue(strategy = GenerationType.IDENTITY)
+                        private Long id;
+                    
+                        @Column(name = "login", unique = true)
+                        private String login;
+                    
+                        @Column(name = "first_name")
+                        private String firstName;
+                    
+                        @Column(name = "last_name")
+                        private String lastName;
+                    
+                        @Column(name = "role")
+                        @Enumerated(value = EnumType.STRING)
+                        private UserRole role;
+                    
+                        @Column(name = "password")
+                        private String password;
+                    
+                        @Column(name = "account_non_expired")
+                        private Boolean accountNonExpired;
+                    
+                        @Column(name = "account_non_locked")
+                        private Boolean accountNonLocked;
+                    
+                        @Column(name = "credentials_non_expired")
+                        private Boolean credentialsNonExpired;
+                    
+                        @Column(name = "enabled")
+                        private Boolean enabled;
+                    
+                        @Override
+                        public Collection<? extends GrantedAuthority> getAuthorities() {
+                            if(this.role == UserRole.ADMIN) {
+                                return List.of(new SimpleGrantedAuthority("ROLE_ADMIN"));
+                            } else if(this.role == UserRole.CLIENT){
+                                return List.of(new SimpleGrantedAuthority("ROLE_CLIENT"));
+                            } else if(this. role == UserRole.EMPLOYEE) {
+                                return List.of(new SimpleGrantedAuthority("ROLE_EMPLOYEE"));
+                            } else {
+                                return null;
+                            }
+                        }
+                    
+                        @Override
+                        public String getPassword() {
+                            return this.password;
+                        }
+                    
+                        @Override
+                        public String getUsername() {
+                            return this.login;
+                        }
+                    
+                        @Override
+                        public boolean isAccountNonExpired() {
+                            return this.accountNonExpired;
+                        }
+                    
+                        @Override
+                        public boolean isAccountNonLocked() {
+                            return this.accountNonLocked;
+                        }
+                    
+                        @Override
+                        public boolean isCredentialsNonExpired() {
+                            return this.credentialsNonExpired;
+                        }
+                    
+                        @Override
+                        public boolean isEnabled() {
+                            return this.enabled;
+                        }
+                    }</code></pre>
+        <h3>3. Construção da classe de enumeração UserRole</h3>
+        <pre>
+                    <code>package com.bcipriano.learning.studiecase.domain;
+
+                        public enum UserRole {
+                            ADMIN("admin"),
+                            EMPLOYEE("employee"),
+                        
+                            CLIENT("client");
+                        
+                            private String role;
+                        
+                            UserRole(String role){
+                                this.role = role;
+                            }
+                        
+                            public String getRole(){
+                                return role;
+                            }
+                        }</code>
+            </pre>
+        <h3>4. Construção da classe Token</h3>
+        <p>Esse é uma classe não persistente que será usada para para representar as credenciais de Autenticação</p>
+        <code>
+            <pre>
+                package com.bcipriano.learning.studiecase.domain;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.Date;
+
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class Token {
+
+    private String login;
+    private boolean authenticated;
+    private String firstName;
+    private String lastName;
+    private UserRole userRole;
+    private Date created;
+    private Date expiration;
+    private String accessToken;
+}
+            </pre>
+        </code>
+        <h3>5. Construção do repositório UserRepository</h3>
+        <p><span class="first-letter"></span>UserRepository:
+
+            UserRepository:
+
+            A interface UserRepository é uma parte da camada de persistência de dados da aplicação.
+            Ela estende JpaRepository e define métodos para interagir com a entidade User no banco de dados. Esses
+            métodos permitem realizar operações de criação, leitura, atualização e exclusão (CRUD) relacionadas aos
+            usuários no banco de dados.
+            Nesse projeto, há um método personalizado findByLogin(String login) que possibilita a busca de um
+            usuário com base no nome de login. Isso é útil para autenticar usuários usando o Spring Security.
+            UserDetails:
+            A interface UserDetails é parte do Spring Security e define um contrato para representar informações
+            detalhadas de um usuário autenticado.
+            Ela é utilizada para armazenar informações como nome de usuário, senha, papéis (roles) e outros detalhes
+            relevantes de um usuário autenticado.
+            A entidade de usuário (no caso, User) deve implementar a interface UserDetails ou fornecer uma implementação
+            personalizada que contenha essas informações detalhadas.
+            UserDetails é crucial para o Spring Security, pois fornece os dados necessários para autenticação e
+            autorização de usuários durante o processo de segurança.
+            Os métodos da interface UserDetails incluem informações como nome de usuário, senha, papéis, status da conta
+            e outros detalhes importantes para o controle de acesso.</p>
+        <div>
+            <pre>
+                    <code>
+                        package com.bcipriano.learning.studiecase.repositories;
+
+                        import com.bcipriano.learning.studiecase.domain.User;
+                        import org.springframework.data.jpa.repository.JpaRepository;
+                        import org.springframework.security.core.userdetails.UserDetails;
+                        import org.springframework.stereotype.Repository;
+
+                        @Repository
+                        public interface UserRepository extends JpaRepository<User, Long> {
+                        
+                            UserDetails findByLogin(String login);
+                        
+                        }
+                    </code>
+                </pre>
+
+        </div>
+        <h3>6. Criar serviço para Users (UserService)</h3>
+        <code>
+            <pre>
+                package com.bcipriano.learning.studiecase.services;
+
+import com.bcipriano.learning.studiecase.domain.User;
+import com.bcipriano.learning.studiecase.repositories.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+
+@Service
+public class UserService implements UserDetailsService {
+
+    @Autowired
+    UserRepository userRepository;
+
+
+    public UserService(UserRepository userRepository){
+        this.userRepository = userRepository;
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {
+        return userRepository.findByLogin(login);
+    }
+
+    public void createNewUser(User user) {
+        if(this.userRepository.findByLogin(user.getLogin()) != null){
+            throw new RuntimeException("User with this login already exists.");
+        }
+        String encryptedPassword = new BCryptPasswordEncoder().encode(user.getPassword());
+        user.setPassword(encryptedPassword);
+        user.setAccountNonExpired(true);
+        user.setAccountNonLocked(true);
+        user.setCredentialsNonExpired(true);
+        user.setEnabled(true);
+        this.userRepository.save(user);
+    }
+
+    public void updateUser(User userAuthenticated, User newUser) {
+        userAuthenticated.setFirstName(newUser.getFirstName());
+        userAuthenticated.setLastName(newUser.getLastName());
+        userRepository.save(userAuthenticated);
+    }
+    
+}
+            </pre>
+        </code>
+        <p><span class="first-letter"></span>Anotação @Service: Esta anotação indica que a classe é um componente de
+            serviço gerenciado pelo Spring. Ela é
+            comumente usada para classes que executam lógica de negócios ou fornecem funcionalidades específicas em um
+            aplicativo Spring.
+        </p>
+        <p><span class="first-letter"></span>Implementação de UserDetailsService: A classe implementa a interface
+            UserDetailsService do Spring Security.
+            Essa interface é usada para carregar detalhes de usuário durante o processo de autenticação. A implementação
+            do método loadUserByUsername busca um usuário com base no nome de login fornecido e retorna os detalhes
+            desse usuário, como as informações necessárias para a autenticação.</p>
+        <p><span class="first-letter"></span> Injeção de Dependência do UserRepository: A classe faz uso do
+            UserRepository, que é uma interface que
+            estende JpaRepository e permite a interação com entidades de usuário no banco de dados.</p>
+        <p><span class="first-letter"></span> Método createNewUser: Este método é responsável por criar um novo usuário
+            no sistema. Antes de criar o
+            usuário, ele verifica se já existe um usuário com o mesmo nome de login. Se já existir, lança uma exceção
+            indicando que o usuário já existe. Caso contrário, ele criptografa a senha do usuário usando o
+            BCryptPasswordEncoder, define algumas propriedades de controle de conta (como conta não expirada, não
+            bloqueada e credenciais não expiradas) e, em seguida, salva o novo usuário no banco de dados.</p>
+        <p><span class="first-letter"></span> Método updateUser: Esse método é usado para atualizar as informações do
+            usuário autenticado. Ele permite que
+            um usuário autenticado atualize seu nome e sobrenome no perfil. As informações atualizadas são salvas no
+            banco de dados.</p>
+        <h3>7. Construir classe para o serviços relacionados aos Tokens (TokenService)</h3>
+        <code>
+            <pre>
+                package com.bcipriano.learning.studiecase.services;
+
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTCreationException;
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.bcipriano.learning.studiecase.domain.Token;
+import com.bcipriano.learning.studiecase.domain.User;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import java.util.Date;
+
+@Service
+public class TokenService {
+    @Value("${security.jwt.token.secret-key}")
+    private String secret;
+
+    @Value("${security.jwt.token.expire-length}")
+    private long validityInMilliseconds;
+
+    public Token createAccessToken(User user) {
+        Date now = new Date();
+        Date validity = new Date(now.getTime() + validityInMilliseconds);
+        String accessToken = generateToken(user.getLogin(), now, validity);
+        return new Token(user.getLogin(), true, user.getFirstName(), user.getLastName(), user.getRole(),  now, validity, accessToken);
+    }
+
+    public String generateToken(String login, Date now, Date validity){
+        try{
+            Algorithm algorithm = Algorithm.HMAC256(secret);
+            return JWT.create()
+                    .withIssuer("auth-api")
+                    .withSubject(login)
+                    .withIssuedAt(now)
+                    .withExpiresAt(validity)
+                    .sign(algorithm);
+        } catch (JWTCreationException exception) {
+            throw new RuntimeException("Error while generating token", exception);
+        }
+    }
+
+    public String validateToken(String token){
+        try {
+            Algorithm algorithm = Algorithm.HMAC256(secret);
+            return JWT.require(algorithm)
+                    .withIssuer("auth-api")
+                    .build()
+                    .verify(token)
+                    .getSubject();
+        } catch (JWTVerificationException exception){
+            throw new IllegalArgumentException("Invalid token");
+        }
+    }
+
+}
+            </pre>
+        </code>
+        <p><span class="first-letter"></span>Anotação @Service: A classe é marcada com a anotação @Service, indicando
+            que é um componente de serviço
+            gerenciado pelo Spring. Essa anotação é usada para criar um bean Spring que pode ser injetado em outras
+            partes do aplicativo.</p>
+        <p><span class="first-letter"></span>Configuração de Propriedades: A classe faz uso de propriedades
+            configuráveis, que são definidas em um
+            arquivo de configuração. Essas propriedades incluem o segredo (secret) usado para assinar os tokens e o
+            tempo de validade dos tokens.</p>
+        <p><span class="first-letter"></span> createAccessToken: Este método cria um token de acesso com base nas
+            informações do usuário. Ele gera um
+            token JWT (JSON Web Token) que contém informações como o nome de login, data de emissão (issued at - "iat"),
+            data de expiração (expiration - "exp"), entre outros. O token é então encapsulado em um objeto Token e
+            retornado.
+        </p>
+        <p><span class="first-letter"></span> generateToken: Este método realiza a geração real do token JWT. Ele
+            utiliza o segredo configurado (secret)
+            para assinar o token e atribui informações como o emissor (issuer - "iss"), assunto (subject), data de
+            emissão (issued at - "iat") e data de expiração (expiration - "exp").</p>
+        <p><span class="first-letter"></span>
+            validateToken: Este método é usado para validar a autenticidade de um token JWT fornecido. Ele verifica se o
+            token foi assinado corretamente usando o segredo configurado. Se o token for válido, ele retorna o assunto
+            do token, que normalmente é o nome de login do usuário.</p>
+        <p><span class="first-letter"></span></p>
+
+        <h3>8. Construir class TokenFilter</h3>
+        <code>
+            <pre>
+                package com.bcipriano.learning.studiecase.config.security;
+
+import com.bcipriano.learning.studiecase.repositories.UserRepository;
+import com.bcipriano.learning.studiecase.services.TokenService;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+
+@Component
+public class SecurityFilter extends OncePerRequestFilter {
+    @Autowired
+    TokenService tokenService;
+    @Autowired
+    UserRepository userRepository;
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        var token = this.recoverToken(request);
+        if(token != null){
+            var login = tokenService.validateToken(token);
+            UserDetails user = userRepository.findByLogin(login);
+
+            var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        }
+        filterChain.doFilter(request, response);
+    }
+
+    private String recoverToken(HttpServletRequest request){
+        var authHeader = request.getHeader("Authorization");
+        if(authHeader == null) return null;
+        return authHeader.replace("Bearer ", "");
+    }
+}
+            </pre>
+        </code>
+        <p><span class="first-letter"></span>Anotação @Component: Esta classe é marcada com a anotação @Component,
+            tornando-a
+            um componente gerenciado pelo Spring. Ela é identificada automaticamente e registrada como um bean do
+            Spring, permitindo que seja injetada em outras partes do aplicativo.</p>
+        <p><span class="first-letter"></span>Herança de OncePerRequestFilter: A classe estende OncePerRequestFilter, que
+            é uma classe de filtro
+            fornecida pelo Spring. Isso garante que o filtro seja executado apenas uma vez por solicitação HTTP,
+            independentemente de quantas vezes o filtro é acionado durante o processamento da solicitação.</p>
+        <p><span class="first-letter"></span>Injeção de Dependência: A classe faz uso da injeção de dependência para
+            acessar dois componentes
+            importantes: TokenService e UserRepository. O TokenService é usado para validar tokens de acesso,
+            enquanto o UserRepository é usado para buscar detalhes do usuário com base no token.</p>
+        <p><span class="first-letter"></span>Método doFilterInternal: Este é o método principal do filtro e é executado
+            para cada solicitação HTTP.
+            Ele executa as seguintes ações:
+
+            Recupera o token de acesso da solicitação usando o método recoverToken.
+            Valida o token usando o TokenService para garantir que seja autêntico.
+            Busca os detalhes do usuário associados ao token no UserRepository.
+            Cria uma instância de UsernamePasswordAuthenticationToken para representar a autenticação do usuário.
+            Define a autenticação no contexto de segurança (SecurityContextHolder) usando o
+            SecurityContextHolder.getContext().setAuthentication(authentication). Isso permite que o Spring Security
+            reconheça o usuário autenticado na solicitação atual.
+            Por fim, passa a solicitação e a resposta para o próximo filtro na cadeia (ou para o controlador, se não
+            houver mais filtros).</p>
+        <p><span class="first-letter"></span>Método recoverToken: Este método recupera o token de acesso do cabeçalho
+            "Authorization" da solicitação.
+            O token é normalmente enviado no cabeçalho com o prefixo "Bearer ".</p>
+        <h3>9. Construir classe de configuração do Spring Security</h3>
+        <code>
+            <pre>
+                package com.bcipriano.learning.studiecase.config.security;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+@Configuration
+@EnableWebSecurity
+public class SecurityConfigurations {
+    @Autowired
+    SecurityFilter securityFilter;
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+        return  httpSecurity
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/auth/update").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/product").hasRole("ADMIN")
+                        .anyRequest().authenticated()
+                )
+                .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
+                .build();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder(){
+        return new BCryptPasswordEncoder();
+    }
+}
+            </pre>
+        </code>
+        <p><span class="first-letter"></span>Para implementar a segurança com o Spring Security
+            é criar uma classe chamada 'SpringConfigurations'. Nesta classe, configuraremos todos os parâmetros
+            relacionados à proteção de rotas e regras específicas que governarão o acesso aos recursos da aplicação.
+            Essas configurações servirão como as diretrizes para o Spring Boot, permitindo que ele controle de forma
+            eficiente a autenticação e a autorização em todas as rotas da nossa aplicação.
+
+            Na classe 'SpringConfigurations', estabelecemos as políticas de segurança, como quais rotas exigem
+            autenticação e quais são de acesso público. Além disso, podemos definir autorizações granulares,
+            especificando quem pode realizar ações específicas dentro da aplicação.</p>
+        <div id="box-code">
+            <div id="list-box">
+                <p><span class="first-letter"></span>@Configuration: Esta anotação marca a classe como uma configuração
+                    do Spring, o que significa que ela
+                    contém informações de configuração que serão usadas pelo contexto de aplicação do Spring.</p>
+                <p><span class="first-letter"></span> @EnableWebSecurity: Esta anotação é usada para habilitar o módulo
+                    de segurança do Spring Security em sua
+                    aplicação. Isso indica que a classe SecurityConfigurations é responsável por configurar a segurança
+                    da
+                    aplicação.</p>
+                <p><span class="first-letter"></span>@Autowired SecurityFilter securityFilter: Isso injeta um bean
+                    chamado securityFilter na classe.
+                    Presumivelmente, SecurityFilter é uma classe personalizada que implementa a lógica de filtragem de
+                    segurança.</p>
+                <p><span class="first-letter"></span>@Bean SecurityFilterChain securityFilterChain(HttpSecurity
+                    httpSecurity): Este método configura a cadeia
+                    de filtros de segurança (SecurityFilterChain) para sua aplicação. Ele recebe uma instância de
+                    HttpSecurity como argumento e define várias configurações de segurança: Desabilita a proteção CSRF
+                    (Cross-Site Request Forgery).
+                    Define a política de gerenciamento de sessões como STATELESS, o que significa que as sessões não
+                    serão
+                    mantidas no servidor.
+                    Especifica regras de autorização para diferentes tipos de solicitações HTTP, como permitir
+                    solicitações
+                    POST para /auth/login, /auth/register, /auth/update sem autenticação, exigir que as solicitações
+                    POST
+                    para /product tenham a função de "ADMIN" e exigir autenticação para todas as outras solicitações.
+                    Adiciona o filtro personalizado securityFilter antes do filtro UsernamePasswordAuthenticationFilter.
+                </p>
+                <p><span class="first-letter"></span>@Bean AuthenticationManager
+                    authenticationManager(AuthenticationConfiguration
+                    authenticationConfiguration): Este método configura o gerenciador de autenticação, que é necessário
+                    para autenticar solicitações. Ele recebe uma instância de AuthenticationConfiguration como argumento
+                    e
+                    obtém o gerenciador de autenticação dela.</p>
+
+                <p><span class="first-letter"></span>
+                    @Bean PasswordEncoder passwordEncoder(): Este método cria e configura um codificador de senha. Neste
+                    caso, ele retorna uma instância de BCryptPasswordEncoder, que é comumente usada para codificar
+                    senhas deb forma segura.</p>
+            </div>
+        </div>
+        <h3>10. Criar o controller de autenticação (AuthenticationController)</h3>
+        <code><pre>
+            package com.bcipriano.learning.studiecase.controllers;
+
+import com.bcipriano.learning.studiecase.controllers.dto.request.AuthenticationDTO;
+import com.bcipriano.learning.studiecase.controllers.dto.request.RegisterDTO;
+import com.bcipriano.learning.studiecase.controllers.dto.request.UserUpdateDTO;
+import com.bcipriano.learning.studiecase.controllers.dto.response.TokenDTO;
+import com.bcipriano.learning.studiecase.domain.User;
+import com.bcipriano.learning.studiecase.domain.UserRole;
+import com.bcipriano.learning.studiecase.services.TokenService;
+import com.bcipriano.learning.studiecase.services.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+
+import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/auth")
+public class AuthenticationController {
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private TokenService tokenService;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @PostMapping("/register")
+    public ResponseEntity<String> register(@RequestBody RegisterDTO registerDTO){
+        User user = converter(registerDTO);
+        userService.createNewUser(user);
+        return ResponseEntity.ok().body("User saved.");
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<TokenDTO> login(@RequestBody AuthenticationDTO authenticationDTO){
+        User userAuthenticated = this.validateUser(authenticationDTO.login(), authenticationDTO.password());
+        var token = tokenService.createAccessToken(userAuthenticated);
+        return ResponseEntity.ok().body(new TokenDTO(token));
+    }
+
+    @PostMapping("/update")
+    public ResponseEntity<?> updateUser(@RequestBody UserUpdateDTO userUpdateDTO) {
+        User user = converter(userUpdateDTO);
+        User userAuthenticated = validateUser(user.getLogin(), user.getPassword());
+        userService.updateUser(userAuthenticated, user);
+
+        return ResponseEntity.ok().body("User updated succesfully.");
+    }
+
+    private User validateUser(String login, String password) {
+        var userNamePassword = new UsernamePasswordAuthenticationToken(login, password);
+        return (User) this.authenticationManager.authenticate(userNamePassword).getPrincipal();
+    }
+
+    public User converter(RegisterDTO registerDTO) {
+        return User.builder()
+                .login(registerDTO.login())
+                .firstName(registerDTO.firstName())
+                .lastName(registerDTO.lastName())
+                .password(registerDTO.password())
+                .role(UserRole.valueOf(registerDTO.role()))
+                .build();
+    }
+
+    public User converter(UserUpdateDTO userUpdateDTO) {
+        return User.builder()
+                .login(userUpdateDTO.login())
+                .password(userUpdateDTO.password())
+                .firstName(userUpdateDTO.firstName())
+                .lastName(userUpdateDTO.lastName())
+                .build();
+    }
+
+
+}
+        </pre></code>
+
+        <p><span class="first-letter"></span>Anotação @RestController e Mapeamento de URL:
+
+            A classe é anotada com @RestController, indicando que ela é um controlador que trata solicitações HTTP e
+            retorna respostas no formato JSON.
+            Todas as operações deste controlador são mapeadas para URLs que começam com "/auth". Por exemplo,
+            "/auth/register" lida com o registro de usuários, "/auth/login" lida com a autenticação e "/auth/update"
+            lida com a atualização de informações do usuário.</p>
+        <p><span class="first-letter"></span>Injeção de Dependências:
+
+            A classe faz uso da injeção de dependência (@Autowired) para acessar dois serviços importantes: UserService
+            e TokenService, bem como o AuthenticationManager. Essas dependências são fornecidas pelo Spring.</p>
+        <p><span class="first-letter"></span>Método register:
+
+            O método register lida com as solicitações de registro de novos usuários. Recebe um objeto RegisterDTO no
+            corpo da solicitação, converte-o para um objeto User, e então chama o método createNewUser do serviço
+            UserService para criar o usuário no sistema.
+            Método login:
+
+            O método login lida com as solicitações de autenticação de usuários. Recebe um objeto AuthenticationDTO no
+            corpo da solicitação, valida as credenciais do usuário usando o método validateUser, gera um token de acesso
+            usando o TokenService e retorna esse token no corpo da resposta.</p>
+        <p><span class="first-letter"></span>Método updateUser:
+
+            O método updateUser permite que os usuários autenticados atualizem suas informações. Ele recebe um objeto
+            UserUpdateDTO no corpo da solicitação, converte-o para um objeto User, valida o usuário usando o método
+            validateUser, e então chama o método updateUser do serviço UserService para atualizar as informações do
+            usuário.</p>
+        <p><span class="first-letter"></span>Métodos converter:
+
+            Os métodos converter são usados para converter objetos DTO (RegisterDTO e UserUpdateDTO) em objetos User,
+            que são usados posteriormente pelo serviço UserService.</p>
+        <hr>
+        <div id="autor-area">
+            <p>Autor: Bruno Cipriano Ribeiro</p>
+        </div>
+    </div>
+
+</body>
+
+</html>

@@ -1,0 +1,132 @@
+* {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+}
+
+html,
+body {
+    font-family: "Nunito Sans", sans-serif;
+    z-index: 0;
+    display: flex;
+    flex-direction: column;
+    background: rgb(255, 255, 255);
+    background: linear-gradient(100deg,
+            rgba(255, 255, 255, 1) 0%,
+            rgba(231, 231, 231, 1) 100%);
+}
+
+#content {
+    padding: 3em;
+    min-height: 90vh;
+    padding-left: 3em;
+    margin-left: 3em;
+}
+
+#content h1 {
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
+    color: rgb(37, 202, 37);
+}
+
+#content h2 {
+    margin-bottom: 1em;
+    margin-top: 2em;
+    color: rgb(37, 202, 37);
+}
+
+#content h3 {
+    margin-top: 2em;
+    color: rgb(37, 202, 37);
+}
+
+#content p {
+    text-align: justify;
+}
+
+#content p span.first-letter {
+    margin-right: 3em;
+    /* Adicione o valor desejado para o espaçamento antes da primeira letra */
+}
+
+#content hr {
+    margin-top: 1em;
+}
+
+#content span {
+    font-weight: bold;
+}
+
+#autor-area {
+    display: flex;
+    justify-content: flex-end;
+}
+
+#box-code {
+    margin-bottom: 0.5em;
+    margin-top: 0.5em;
+    padding: 0.5em;
+    border: 1px solid gray;
+    background-color: rgb(236, 236, 236);
+    display: flex;
+    justify-content: center;
+}
+
+#list-box {
+    padding: 2em;
+    display: flex;
+    flex-direction: column;
+}
+
+#solve-area {
+    padding: 0.8em;
+    border: 1px solid black;
+}
+
+footer {
+    background-color: rgb(37, 202, 37);
+    margin-left: 3em;
+}
+
+#download-area {
+    margin-bottom: 2em;
+    margin-top: 5em;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+#download-area a {
+    margin-bottom: 2em;
+    margin-top: 1em;
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #007bff;
+    /* Cor de fundo do botão */
+    color: #fff;
+    /* Cor do texto do botão */
+    text-align: center;
+    text-decoration: none;
+    /* Remova a decoração de link padrão */
+    border: none;
+    cursor: pointer;
+}
+
+#download-area span {}
+
+#download-area img {
+    margin-left: 0.1em;
+    height: 1em;
+}
+
+pre {
+    background-color: #f4f4f4;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    white-space: pre-wrap;
+    /* Permite que o texto quebre automaticamente */
+    overflow-wrap: break-word;
+    /* Força a quebra de palavras longas */
+}

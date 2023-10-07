@@ -1,0 +1,13 @@
+header {
+    background-color: rgb(37, 202, 37);
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.5);
+    margin-left: 3em;
+    display: flex;
+    flex-direction: column;
+    padding-right: 0.5em;
+}
+
+header img {
+    margin-left: auto;
+    width: 3em;
+}
